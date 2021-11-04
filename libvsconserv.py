@@ -9,7 +9,7 @@ import norm_tests
 
 np.random.seed(1)
 
-norm_x = np.random.normal(10, 10, 20)
+norm_x = np.random.normal(100, 10, 20)
 
 def calc_pplot_stats(x, dist='norm',ptype='percent', alpha=0.05):
     '''
@@ -36,6 +36,7 @@ def calc_pplot_stats(x, dist='norm',ptype='percent', alpha=0.05):
         pffit = scipy.stats.norm(loc=loc,scale=scale)
         th_x = np.linspace(x.min(), x.max(), 10)
         th_prob = pffit.cdf(th_x)
+    ret['dist'] = dist
     ret['exp_x'] = x
     ret['exp_prob'] = exp_prob
     ret['th_x'] = th_x
@@ -60,6 +61,11 @@ def plt_norm(vec):
     g.set_ylim(0.001, 0.999)
     g.set_yscale('ppf')
     scat(vec['exp_x'], vec['exp_prob'], alpha=1.0, size=8, ax=g)
+    pval_xpos = np.min(vec['exp_x']) + 0.015 * (np.max(vec['exp_x']) - np.min(vec['exp_x']))
+    plt.text(pval_xpos, 0.985,
+             'AD: {0:1.3f}\nKolg: {1:1.3f}\nShap-Wilk: {2:1.3f}'.format(vec['pval_AD'],
+                                                                        vec['pval_kolgomorov'],
+                                                                        vec['pval_shap_wilk']))
     shw()
     
 def calc_pi(rank):
