@@ -82,11 +82,11 @@ if __name__ == '__main__':
         set_build()
     else:
         setuptools.setup (
-            name = 'pl0t', 
+            name = 'proc_cap', 
             version = get_version(),
             author = 'Benoit FREMON', 
             author_email = 'ben@in.volution.fr',
-            description = 'Wrapper & convenience funcs for seaborn',
+            description = 'Poor man\'s \"convoluted\" stackup by Monte Carlo.',
             long_description_content_type = 'text/markdown',
             url = 'https://dev.volution.fr',
             packages = setuptools.find_packages(),
