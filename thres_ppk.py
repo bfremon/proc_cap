@@ -1,0 +1,92 @@
+#!/usr/bin/python3
+
+import numpy as np
+import scipy
+import pandas as pd
+from pl0t import *
+import seaborn as sns
+import matplotlib.pyplot as plt
+import proc_cap.Ppk as pcap
+
+def meet_ppk(x, target_Ppk, dist='norm', usl=None, lsl=None, ret_ppk=False):
+    '''
+    Fit x vector with dist statistical distribution calculate Ppk
+    with USL and / or LSL
+    return True if Ppk >= target_ppk, False otherwise.
+    x: 1D vector
+    dist: 'norm' only.
+    target_Ppk: minimum required process capability
+    usl: Upper Spec Limit
+    lsl: Lower Spec Limit
+    ret_ppk: if set to True, return (True/False, ppk)
+    '''
+    ret = True
+    if not usl and not lsl:
+        raise SyntaxError('LSL and / or USL needed')
+    if lsl >= usl:
+        raise SyntaxError('LSL must be strictly inferior to USL')
+    if target_Ppk <= 0:
+        raise SyntaxError('Target Ppk must be stricly superior to 0')
+    if dist == 'norm':
+        ppk = pcap.norm_ppk(x, usl=usl, lsl=lsl)
+        if ppk < target_Ppk:
+            ret = False
+    else:
+        raise SyntaxError('%s statistical law: not supported'% str(dist))
+    if ret_ppk:
+        return (ret, ppk)
+    return ret
+
+
+def uniform_between(vmin, vmax):
+    if vmin > vmax:
+        raise SyntaxError('vmin must be strictly inferior to vmax')
+    ret = vmin + scipy.stats.uniform.rvs(size=1) * (vmax - vmin)
+    return ret
+
+
+def thres_norm_ppk(mu_min, mu_max, s_min, s_max,
+                             lsl=None, usl=None, mc_draws=10**4):
+    '''
+    Evaluate normal law Ppk using lsl and usl, 
+    with mean in [mu_min, mu_max] and standard
+    deviation in [s_min, s_max] picked randomly
+    mu_min: minimum mean
+    mu_max: maximum mean
+    s_min: minimum stdev
+    s_max: maximum stdev
+    lsl: Lower Specification Limit
+    usl: Upper Specification Limit
+    '''
+    i = 0
+    r = {}
+    while i < mc_draws:
+        mu = uniform_between(mu_min, mu_max)[0]
+        s = uniform_between(s_min, s_max)[0]
+        x = scipy.stats.norm.rvs(loc=mu, scale=s, size=200)
+        r[i] = (mu, s, meet_ppk(x, ppk_thres, lsl=lsl, usl=usl, ret_ppk=True)[1])
+        i += 1
+    ret = pd.DataFrame(r).transpose()
+    ret.columns = ('mu', 's', 'Ppk')
+    return ret
+
+
+def plt_ppks(thres_ppk_out):
+    '''Plot a flat 3D scatter plot from thres_norm_ppk() output''' 
+    cmap = sns.cubehelix_palette(as_cmap=True)
+    f, ax = plt.subplots()
+    points = ax.scatter(df['mu'], df['s'], c=df['Ppk'], cmap=cmap) 
+    f.colorbar(points)
+    shw()
+
+    
+if __name__ == '__main__':
+    lsl = 6
+    usl = 14
+    mu_min = lsl
+    mu_max = usl
+    s_min = 0.1
+    s_max = (usl - lsl) / 3
+    ppk_thres = 1.33
+    df = thres_norm_ppk(mu_min, mu_max, s_min, s_max, lsl, usl)
+    plt_ppks(df)
