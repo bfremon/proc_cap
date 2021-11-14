@@ -80,6 +80,24 @@ def plt_ppks(thres_ppk_out):
     shw()
 
     
+def upper_norm_std(mu, Ppk, lsl=None, usl=None):
+    '''
+    Return the maximum standard deviation to meet Ppk 
+    with mean mu and specifications limits lsl and usl
+    mu: mean
+    Ppk: Long Term process capability
+    lsl: Lower Specification Limit
+    usl: Upper Specification Limit
+    '''
+    if lsl > usl:
+        raise SyntaxError('LSL must be inferior to USL')
+    nominal = (lsl + usl) / 2
+    if mu <= nominal:
+        ret = abs(lsl - mu) / (3 * Ppk)
+    else:
+        ret = abs(usl - mu) / (3 * Ppk)
+    return ret
+    
 if __name__ == '__main__':
     lsl = 6
     usl = 14
@@ -88,5 +106,13 @@ if __name__ == '__main__':
     s_min = 0.1
     s_max = (usl - lsl) / 3
     ppk_thres = 1.33
-    df = thres_norm_ppk(mu_min, mu_max, s_min, s_max, lsl, usl)
-    plt_ppks(df)
+    # df = thres_norm_ppk(mu_min, mu_max, s_min, s_max, lsl, usl)
+    # plt_ppks(df)
+    x = np.linspace(lsl, usl, 50)
+    crit_s = []
+    for v in x:
+        crit_s.append(upper_norm_std(v, ppk_thres, lsl, usl))
+    scat(x, crit_s)
+    shw()
+    
+        
