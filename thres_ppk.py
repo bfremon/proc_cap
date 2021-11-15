@@ -23,8 +23,7 @@ def meet_ppk(x, target_Ppk, dist='norm', usl=None, lsl=None, ret_ppk=False):
     ret = True
     if not usl and not lsl:
         raise SyntaxError('LSL and / or USL needed')
-    if lsl >= usl:
-        raise SyntaxError('LSL must be strictly inferior to USL')
+    __chk_specs(lsl, usl)
     if target_Ppk <= 0:
         raise SyntaxError('Target Ppk must be stricly superior to 0')
     if dist == 'norm':
@@ -58,6 +57,7 @@ def thres_norm_ppk(mu_min, mu_max, s_min, s_max,
     lsl: Lower Specification Limit
     usl: Upper Specification Limit
     '''
+    __chk_specs(lsl, usl)
     i = 0
     r = {}
     while i < mc_draws:
@@ -89,15 +89,18 @@ def upper_norm_std(mu, Ppk, lsl=None, usl=None):
     lsl: Lower Specification Limit
     usl: Upper Specification Limit
     '''
-    if lsl > usl:
-        raise SyntaxError('LSL must be inferior to USL')
+    __chk_specs(lsl, usl)
     nominal = (lsl + usl) / 2
     if mu <= nominal:
         ret = abs(lsl - mu) / (3 * Ppk)
     else:
         ret = abs(usl - mu) / (3 * Ppk)
     return ret
-    
+
+def __chk_specs(lsl, usl): 
+    if lsl > usl:
+        raise SyntaxError('LSL must be strictly inferior to USL')
+
 if __name__ == '__main__':
     lsl = 6
     usl = 14
@@ -106,8 +109,8 @@ if __name__ == '__main__':
     s_min = 0.1
     s_max = (usl - lsl) / 3
     ppk_thres = 1.33
-    # df = thres_norm_ppk(mu_min, mu_max, s_min, s_max, lsl, usl)
-    # plt_ppks(df)
+    df = thres_norm_ppk(mu_min, mu_max, s_min, s_max, lsl, usl)
+    plt_ppks(df)
     x = np.linspace(lsl, usl, 50)
     crit_s = []
     for v in x:
