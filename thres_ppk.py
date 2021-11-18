@@ -38,8 +38,7 @@ def meet_ppk(x, target_Ppk, dist='norm', usl=None, lsl=None, ret_ppk=False):
 
 
 def uniform_between(vmin, vmax):
-    if vmin > vmax:
-        raise SyntaxError('vmin must be strictly inferior to vmax')
+    __must_be_sup(vmin, vmax)
     ret = vmin + scipy.stats.uniform.rvs(size=1) * (vmax - vmin)
     return ret
 
@@ -57,7 +56,7 @@ def thres_norm_ppk(mu_min, mu_max, s_min, s_max,
     lsl: Lower Specification Limit
     usl: Upper Specification Limit
     '''
-    __chk_specs(lsl, usl)
+    __must_be_sup(lsl, usl)
     i = 0
     r = {}
     while i < mc_draws:
@@ -89,7 +88,7 @@ def upper_norm_std(mu, Ppk, lsl=None, usl=None):
     lsl: Lower Specification Limit
     usl: Upper Specification Limit
     '''
-    __chk_specs(lsl, usl)
+    __must_be_sup(lsl, usl)
     nominal = (lsl + usl) / 2
     if mu <= nominal:
         ret = abs(lsl - mu) / (3 * Ppk)
@@ -108,8 +107,7 @@ def gen_rnd_gennorm(x_min, x_max, s=None, x_shift=None, smpl_size=200, smpl_nb=5
     smpl_nb: number of random gaussian to be generated
     '''
     ret = []
-    if x_min > x_max:
-        raise SyntaxError('x_min must be inferior to x_max')
+    __must_be_sup(x_min, x_max)
     if not s:
         s = (x_max - x_min) / smpl_size
     if not x_shift:
@@ -140,10 +138,11 @@ def fit_gennorm(dat, retparm=False, size=1000):
         return ret
         
 
-def __chk_specs(lsl, usl): 
-    if lsl > usl:
-        raise SyntaxError('LSL must be strictly inferior to USL')
+def __must_be_sup(mini, maxi): 
+    if mini > maxi:
+        raise SyntaxError('minimum must be strictly inferior to maximum')
 
+    
 if __name__ == '__main__':
     lsl = 6
     usl = 14
