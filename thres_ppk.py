@@ -97,6 +97,49 @@ def upper_norm_std(mu, Ppk, lsl=None, usl=None):
         ret = abs(usl - mu) / (3 * Ppk)
     return ret
 
+
+def gen_rnd_gennorm(x_min, x_max, s=None, x_shift=None, smpl_size=200, smpl_nb=50):
+    '''
+    Return a generalized normal law (type I) fit between bounds mu_min and mu_max
+    x_min, x_max: bounds
+    s: stdev
+    x_shift: step used to shift gaussian from x_min to x_max
+    smpl_size: number of samples per random gaussian
+    smpl_nb: number of random gaussian to be generated
+    '''
+    ret = []
+    if x_min > x_max:
+        raise SyntaxError('x_min must be inferior to x_max')
+    if not s:
+        s = (x_max - x_min) / smpl_size
+    if not x_shift:
+        x_shift = (x_max - x_min) / smpl_nb
+    gauss = scipy.stats.norm.rvs(loc=x_min, scale=s, size=smpl_size)
+    for shift in np.linspace(0, x_max - x_min, smpl_nb):
+        ret += np.ndarray.tolist(gauss + shift)
+    return ret
+
+
+def fit_gennorm(dat, retparm=False, size=1000):
+    '''
+    Fit dat with generalized normal law and return a pdf vector
+    dat: data to be fitted 
+    retparm: return fit params if set to True, otherwise return pdf vector
+    size: number of points of the returned pdf
+    '''
+    beta, loc, scale = scipy.stats.gennorm.fit(dat)
+    print(beta, loc, scale)
+    x = np.linspace(np.min(dat), np.max(dat), size)
+    ret = scipy.stats.gennorm.pdf(x, beta=beta, loc=loc, scale=scale)
+    #    hist(dat)
+    #    lplt(x, y)
+    #shw()
+    if retparm:
+        return (beta, loc, scale)
+    else:
+        return ret
+        
+
 def __chk_specs(lsl, usl): 
     if lsl > usl:
         raise SyntaxError('LSL must be strictly inferior to USL')
@@ -109,13 +152,17 @@ if __name__ == '__main__':
     s_min = 0.1
     s_max = (usl - lsl) / 3
     ppk_thres = 1.33
-    df = thres_norm_ppk(mu_min, mu_max, s_min, s_max, lsl, usl)
-    plt_ppks(df)
-    x = np.linspace(lsl, usl, 50)
-    crit_s = []
-    for v in x:
-        crit_s.append(upper_norm_std(v, ppk_thres, lsl, usl))
-    scat(x, crit_s)
+    # df = thres_norm_ppk(mu_min, mu_max, s_min, s_max, lsl, usl)
+    # plt_ppks(df)
+    # x = np.linspace(lsl, usl, 500)
+    # crit_s = []
+    # for v in x:
+    #     crit_s.append(upper_norm_std(v, ppk_thres, lsl, usl))
+    # lplt(x, crit_s)
+    # shw()
+    x = gen_rnd_gennorm(8, 12)
+    y = fit_gennorm(x)
+    lplt(np.linspace(np.min(x), np.max(x), 1000), y)
     shw()
-    
-        
+    # hist(x)
+    # shw()
