@@ -51,9 +51,27 @@ class stkup():
             coef = self.__set_name_coef(dim, i)
             self.name += coef + dim.name + ' '
             i += 1
-        print(self.name)
+        self.dims = dims
+
+        
+    def compare(self):
+        print('Stackup: %s ' % self.name)
+        print('Worst case - min: %1.3f, max: %1.3f' % self.worst_case())
 
 
+    def worst_case(self):
+        mini = 0
+        maxi = 0
+        for dim in self.dims:
+            if dim.direction > 0:
+                mini += dim.direction * dim.lsl
+                maxi += dim.direction * dim.usl
+            else:
+                mini += dim.direction * dim.usl
+                maxi += dim.direction * dim.lsl
+        return (mini, maxi)
+    
+                
     def __set_name_coef(self, dim, i):
         ret = ''
         if dim.direction < -1:
@@ -72,8 +90,8 @@ class stkup():
                 ret = str(dim.direction) + '*' 
         return ret 
 
-        
-dim_a = stkup_dim('a', -3,  5, 10)
-dim_b = stkup_dim('b', 2, 6, 12)
-dim_c = stkup_dim('c', -1, 15, 16)
-stkup(dim_a, dim_b, dim_c)
+if __name__ == '__main__':
+    dim_a = stkup_dim('a', 1,  5, 10)
+    dim_b = stkup_dim('b', 1, 6, 12)
+    dim_c = stkup_dim('c', -1, 9, 11)
+    stkup(dim_a, dim_b, dim_c).compare()
