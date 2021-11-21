@@ -48,21 +48,32 @@ class stkup():
         self.name = ''
         i = 0
         for dim in dims:
-            if dim.direction > 0:
-                sign = '+'
-            else:
-                sign = '-'
-            if i == 0 and dim.direction > 0:
-                sign = ''
-            if abs(dim.direction) == 1:
-                coef = ''
-            else:
-                coef == abs(dim.direction)
-            self.name += sign + ' ' + str(coef) + dim.name + ' ' 
+            coef = self.__set_name_coef(dim, i)
+            self.name += coef + dim.name + ' '
             i += 1
         print(self.name)
+
+
+    def __set_name_coef(self, dim, i):
+        ret = ''
+        if dim.direction < -1:
+            ret = '- ' + str(abs(dim.direction)) + '*'
+        elif dim.direction == -1:
+                ret = '- '
+        elif dim.direction == 1:
+            if i > 0:
+                ret = '+ '
+            else:
+                ret = ''
+        else:
+            if i > 0:
+                ret = '+ ' + str(dim.direction) + '*'
+            else:
+                ret = str(dim.direction) + '*' 
+        return ret 
+
         
-dim_a = stkup_dim('a', -1,  5, 10)
-dim_b = stkup_dim('b', 1, 6, 12)
+dim_a = stkup_dim('a', -3,  5, 10)
+dim_b = stkup_dim('b', 2, 6, 12)
 dim_c = stkup_dim('c', -1, 15, 16)
 stkup(dim_a, dim_b, dim_c)
