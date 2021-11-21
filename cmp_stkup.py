@@ -12,7 +12,19 @@ usl_c = 16
 class stkup_dim():
 
     
-    def __init__(self, name, direction, lsl, usl, std_hat=None, Ppk_min=None):
+    def __init__(self, name, direction, lsl, usl,
+                 mu_hat=None, std_hat=None, Ppk_min=None):
+        '''
+        Create a stackup dimension object
+        name: dimension name
+        direction: dimension direction / coefficient
+        lsl: Lower Spec Limit
+        usl: Upper Spec Limit
+        mu_hat: estimated mean
+        std_hat: estimated standard deviation
+        Ppk_min: minimum process capability
+        '''
+
         self.name = name
         self.direction = direction
         if not isinstance(direction, int) or self.direction == 0:
@@ -55,11 +67,17 @@ class stkup():
 
         
     def compare(self):
+        '''
+        Compare different stackup options
+        '''
         print('Stackup: %s ' % self.name)
         print('Worst case - min: %1.3f, max: %1.3f' % self.worst_case())
 
 
     def worst_case(self):
+        '''
+        Worst case stackup
+        '''
         mini = 0
         maxi = 0
         for dim in self.dims:
