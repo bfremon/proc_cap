@@ -38,7 +38,7 @@ class stkup_dim():
         self.Ppk_min = None
         if Ppk_min:
             self.Ppk_min = Ppk_min
-            self.nominal = self.__calc_nominal()
+        self.nominal = self.__calc_nom()
 
             
     def __must_be_sup(self, mini, maxi):
@@ -47,7 +47,7 @@ class stkup_dim():
 
         
     def __calc_nom(self):
-        self.nominal = (self.lsl + self.usl) / 2
+        return (self.lsl + self.usl) / 2
 
         
 class stkup():
@@ -71,6 +71,7 @@ class stkup():
         Compare different stackup options
         '''
         print('Stackup: %s ' % self.name)
+        print('Nominal: %1.3f' % self.nominal())
         print('Worst case - min: %1.3f, max: %1.3f' % self.worst_case())
 
 
@@ -88,8 +89,18 @@ class stkup():
                 mini += dim.direction * dim.usl
                 maxi += dim.direction * dim.lsl
         return (mini, maxi)
+
     
-                
+    def nominal(self):
+        '''
+        return nominal stakup
+        '''
+        ret = 0
+        for dim in self.dims:
+            ret += dim.direction * dim.nominal
+        return ret
+
+    
     def __set_name_coef(self, dim, i):
         ret = ''
         if dim.direction < -1:
