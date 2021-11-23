@@ -32,13 +32,19 @@ class stkup_dim():
         self.__must_be_sup(lsl, usl)
         self.lsl = lsl
         self.usl = usl
-        self.std_hat = None
-        if std_hat:
-            self.std_hat = std_hat
-        self.Ppk_min = None
-        if Ppk_min:
-            self.Ppk_min = Ppk_min
         self.nominal = self.__calc_nom()
+        self.mean_hat = None
+        self.std_hat = None
+        self.Ppk_min = None
+        if std_hat:
+            if PPk_min:
+                self.__err_ppk_std()
+            self.std_hat = std_hat
+        if Ppk_min:
+            if std_hat:
+                self.__err_ppk_std()
+            self.Ppk_min = Ppk_min
+            self.std_hat = self.__calc_std()
 
             
     def __must_be_sup(self, mini, maxi):
@@ -48,6 +54,18 @@ class stkup_dim():
         
     def __calc_nom(self):
         return (self.lsl + self.usl) / 2
+
+
+    def __calc_std(self):
+        if self.mean_hat:
+            print('off center mean not supported')
+            pass
+        ret = abs(self.usl - self.nominal) / (3 * self.Ppk_min)
+        return ret        
+
+    
+    def __err_ppk_std(self):
+            raise SyntaxError('PPk_min and std_hat can\'t be set at the same time')
 
         
 class stkup():
@@ -64,6 +82,7 @@ class stkup():
             self.name += coef + dim.name + ' '
             i += 1
         self.dims = dims
+        self.nominal = self.nominal()
 
         
     def compare(self):
@@ -71,10 +90,16 @@ class stkup():
         Compare different stackup options
         '''
         print('Stackup: %s ' % self.name)
-        print('Nominal: %1.3f' % self.nominal())
+        print('Nominal: %1.3f' % self.nominal)
         print('Worst case - min: %1.3f, max: %1.3f' % self.worst_case())
+        tol_ti = self.stats('ti')
+        print('Statistical (tolerance interval) - min %1.3f, max %1.3f' %
+              (self.nominal - tol_ti, self.nominal + tol_ti))
+        tol_ppk = self.stats('std')
+        print('Statistical (std) - min %1.3f, max %1.3f' %
+              (self.nominal - tol_ppk, self.nominal + tol_ppk))
 
-
+              
     def worst_case(self):
         '''
         Worst case stackup
@@ -100,6 +125,25 @@ class stkup():
             ret += dim.direction * dim.nominal
         return ret
 
+
+    def stats(self, type='std'):
+        '''
+        return statistical tolerance interval
+        type: either-
+             - ti - tolerance interval,
+             - std - observed standard deviation, 
+        '''
+        ret = 0
+        for dim in self.dims:
+            if type == 'ti':
+                ti = (dim.usl - dim.lsl) / 2
+                ret += ti ** 2
+            elif type == 'std':
+                ret += dim.std_hat ** 2
+            else:
+                raise SyntaxError('Unknown statistical stackup: %s' % str(type))
+        return np.sqrt(ret)
+
     
     def __set_name_coef(self, dim, i):
         ret = ''
@@ -120,7 +164,7 @@ class stkup():
         return ret 
 
 if __name__ == '__main__':
-    dim_a = stkup_dim('a', 1,  5, 10)
-    dim_b = stkup_dim('b', 1, 6, 12)
-    dim_c = stkup_dim('c', -1, 9, 11)
+    dim_a = stkup_dim('a', 1,  5, 10, Ppk_min=1.33)
+    dim_b = stkup_dim('b', 1, 6, 12, Ppk_min=1.0)
+    dim_c = stkup_dim('c', -1, 9, 11, Ppk_min=1.5)
     stkup(dim_a, dim_b, dim_c).compare()
