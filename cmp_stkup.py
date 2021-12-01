@@ -6,12 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pl0t import *
 
-lsl_a = 5
-usl_a = 10
-lsl_b = 6
-usl_b = 12
-lsl_c = 15
-usl_c = 16
 
 class stkup_dim():
 
