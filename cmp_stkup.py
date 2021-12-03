@@ -38,6 +38,10 @@ class stkup_dim():
         self.mu_hat = None
         self.std_hat = None
         self.Ppk_min = None
+        if dist == 'equiprobable':
+            if std_hat or Ppk_min:
+                raise SyntaxError("Ppk_min, std_hat or mu_hat can\'t be set with equiprobable law")
+            self.std_hat = self.__calc_std()
         if std_hat:
             if PPk_min:
                 self.__err_ppk_std()
@@ -62,17 +66,25 @@ class stkup_dim():
 
 
     def __calc_std(self):
-        if self.mu_hat == self.__calc_nom():
-            print('off center mean not supported')
+        if self.dist == 'equiprobable':
+            ret = np.sqrt((self.usl - self.lsl)**2 / 12)
+        elif self.dist == 'norm':
+            if self.mu_hat == self.__calc_nom():
+                print('off center mean not supported')
+                pass
+            ret = abs(self.usl - self.nominal) / (3 * self.Ppk_min)
+        elif dist == 'gennorm':
             pass
-        ret = abs(self.usl - self.nominal) / (3 * self.Ppk_min)
         return ret        
 
     
     def rndm_scal(self):
-        if not self.mu_hat and not self.std_hat:
-            raise SyntaxError('mean and std must be specified to draw random number')
-        ret = stats.norm.rvs(loc=self.mu_hat, scale=self.std_hat)
+        if self.dist == 'norm':
+            if not self.mu_hat and not self.std_hat:
+                raise SyntaxError('mean and std or Ppk  must be specified to draw random number')
+            ret = stats.norm.rvs(loc=self.mu_hat, scale=self.std_hat)
+        elif self.dist == 'equiprobable':
+            ret = stats.uniform.rvs(loc=self.lsl, scale=self.usl - self.lsl)
         return ret
 
     
@@ -211,6 +223,13 @@ class stkup():
     
 if __name__ == '__main__':
     dim_a = stkup_dim('a', 1,  5, 10, Ppk_min=1.33)
+    dim_b = stkup_dim('b', 1, 6, 12, Ppk_min=1.0)
+    dim_c = stkup_dim('c', -1, 9, 11, Ppk_min=1.5)
+    stk = stkup(dim_a, dim_b, dim_c)
+    stk.compare()
+    print(stk.get_inputs())
+
+    dim_a = stkup_dim('a', 1,  5, 10, dist='equiprobable')
     dim_b = stkup_dim('b', 1, 6, 12, Ppk_min=1.0)
     dim_c = stkup_dim('c', -1, 9, 11, Ppk_min=1.5)
     stk = stkup(dim_a, dim_b, dim_c)
