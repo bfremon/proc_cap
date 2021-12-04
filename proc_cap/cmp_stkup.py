@@ -3,6 +3,7 @@
 import numpy as np
 from scipy import stats
 import pandas as pd
+import norm_tests
 
 class stkup_dim():
 
@@ -233,7 +234,7 @@ class stkup():
             self.__must_be_sup(lsl, usl)
         if dist == 'norm':
             if pval:
-                pass
+                print('Anderson Darling normality p-value: %1.3f' % norm_tests.AD(pop))
             mu_hat, std_hat = stats.norm.fit(pop)
             if usl:
                 usl_dppm = 1.0 - stats.norm.cdf(usl, loc=mu_hat, scale=std_hat)
