@@ -208,6 +208,7 @@ class stkup():
     def monte_carlo(self, draws = 10**4):
         '''
         Stackup Monte Carlo simulation
+        draws: number of draws for simulation
         '''
         cnt = 0
         ret = []
