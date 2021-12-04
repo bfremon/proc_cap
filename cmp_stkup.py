@@ -55,6 +55,7 @@ class stkup_dim():
             self.mu_hat = self.__calc_nom()
         else:
             self.mu_hat = mu_hat
+
             
     def __must_be_sup(self, mini, maxi):
         if mini >= maxi:
@@ -126,7 +127,7 @@ class stkup():
         return pd.DataFrame(ret).transpose()
     
                         
-    def compare(self):
+    def compare(self, lsl=None, usl=None):
         '''
         Compare different stackup options
         '''
@@ -139,11 +140,18 @@ class stkup():
         tol_ppk = self.stats('std')
         print('Statistical (std) - mu %1.3f, s %1.3f' %
               (self.nominal, tol_ppk))
+        if lsl or usl:
+            stat_pop = stats.norm.rvs(loc=self.nominal, scale=tol_ppk, size = 10**4)
+            print('Statistical (std) - defects: %6.2f' % 
+                  self.calc_dppm(stat_pop, lsl=lsl, usl=usl))
         mc_pop = self.monte_carlo()
         mc_pop_std = np.std(mc_pop)
         mc_pop_mu = np.mean(mc_pop)
         print('Monte Carlo - mu %1.3f, std %1.3f' %
               (mc_pop_mu, mc_pop_std))
+        if lsl or usl:
+            print('Statistical (Monte Carlo) - defects: %6.2f' % 
+                  self.calc_dppm(mc_pop, lsl=lsl, usl=usl))
         
               
     def worst_case(self):
@@ -200,7 +208,40 @@ class stkup():
                 stk += dim.direction * dim.rndm_scal()
             ret.append(stk)
         return ret
-    
+
+
+    def calc_dppm(self, pop, lsl=None, usl=None, dist='norm', pval=True):
+        '''
+        Return total defect occurrence (in dppm) for data using lsl and usl
+        pop: sample
+        lsl: Lower Specification Limit
+        usl: Upper Specification Limit
+        dist: distribution to be used (normal)
+        pval: if True, assess normality of data with dist
+        '''
+        ret = 0
+        usl_dppm = 0
+        lsl_dppm = 0
+        if lsl != None and usl != None:
+            self.__must_be_sup(lsl, usl)
+        if dist == 'norm':
+            if pval:
+                pass
+            mu_hat, std_hat = stats.norm.fit(pop)
+            if usl:
+                usl_dppm = 1.0 - stats.norm.cdf(usl, loc=mu_hat, scale=std_hat)
+            if lsl:
+                usl_dppm = 1.0 - stats.norm.cdf(lsl, loc=mu_hat, scale=std_hat)
+        else:
+            raise SyntaxError('dist not supported')
+        ret = (lsl_dppm + usl_dppm) * 10**6
+        return ret
+                
+        
+    def __must_be_sup(self, mini, maxi):
+        if mini >= maxi:
+            raise SyntaxError('mini must be strictly inferior to maxi')
+        
                     
     def __set_name_coef(self, dim, i):
         ret = ''
@@ -233,5 +274,5 @@ if __name__ == '__main__':
     dim_b = stkup_dim('b', 1, 6, 12, Ppk_min=1.0)
     dim_c = stkup_dim('c', -1, 9, 11, Ppk_min=1.5)
     stk = stkup(dim_a, dim_b, dim_c)
-    stk.compare()
+    stk.compare(lsl=6, usl=10)
     print(stk.get_inputs())
