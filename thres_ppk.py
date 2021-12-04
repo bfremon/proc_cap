@@ -154,14 +154,26 @@ if __name__ == '__main__':
     # df = thres_norm_ppk(mu_min, mu_max, s_min, s_max, lsl, usl)
     # plt_ppks(df)
     # x = np.linspace(lsl, usl, 500)
-    # crit_s = []
-    # for v in x:
-    #     crit_s.append(upper_norm_std(v, ppk_thres, lsl, usl))
     # lplt(x, crit_s)
     # shw()
-    x = gen_rnd_gennorm(8, 12)
-    y = fit_gennorm(x)
-    lplt(np.linspace(np.min(x), np.max(x), 1000), y)
-    shw()
+    # x = gen_rnd_gennorm(8, 12)
+    # y = fit_gennorm(x)
+    # lplt(np.linspace(np.min(x), np.max(x), 1000), y)
+    # shw()
     # hist(x)
     # shw()
+    x = np.linspace(lsl, usl, 200)
+    crit_s = []
+    for v in x:
+        crit_s.append(upper_norm_std(v, ppk_thres, lsl, usl))
+    # lplt(x, crit_s)
+    # shw()
+    r = np.array([])
+    for i in range(len(x)):
+        mu = x[i]
+        s = crit_s[i]
+        rnd_dat = scipy.stats.norm.rvs(loc=mu, scale=s, size=200)
+        r = np.concatenate((r, rnd_dat))
+    print(len(r))
+    hist(r)
+    shw()
