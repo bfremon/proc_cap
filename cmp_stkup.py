@@ -80,6 +80,9 @@ class stkup_dim():
 
     
     def rndm_scal(self):
+        ''' 
+        Return a random scalar based on the location / scale given at creation
+        '''
         if self.dist == 'norm':
             if not self.mu_hat and not self.std_hat:
                 raise SyntaxError('mean and std or Ppk  must be specified to draw random number')
@@ -111,6 +114,9 @@ class stkup():
 
         
     def get_inputs(self):
+        '''
+        Return a dataframe with inputs given at creation
+        '''
         ret = {'name': [], 'dist': [], 'direction': [],'lsl': [], 'usl': [],
                'nominal': [], 'mu_hat': [], 'std_hat': [],
                'Ppk_min': []}
@@ -200,6 +206,9 @@ class stkup():
 
     
     def monte_carlo(self, draws = 10**4):
+        '''
+        Stackup Monte Carlo simulation
+        '''
         cnt = 0
         ret = []
         for i in range(draws):
