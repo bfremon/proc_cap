@@ -3,9 +3,6 @@
 import numpy as np
 from scipy import stats
 import pandas as pd
-import matplotlib.pyplot as plt
-from pl0t import *
-
 
 class stkup_dim():
 
@@ -273,6 +270,9 @@ class stkup():
 
     
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    from pl0t import *
+
     dim_a = stkup_dim('a', 1,  5, 10, Ppk_min=1.33)
     dim_b = stkup_dim('b', 1, 6, 12, Ppk_min=1.0)
     dim_c = stkup_dim('c', -1, 9, 11, Ppk_min=1.5)
