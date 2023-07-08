@@ -8,7 +8,7 @@ import random
 import string
 import pandas as pd
 
-def norm_ppk(x, lsl = None, usl = None):
+def norm(x, lsl = None, usl = None):
     '''
     Return Ppk with normal law
     x: 1D sample vector
@@ -63,7 +63,7 @@ def batch_ppk(dat, cat, val, lsl, usl, mul=3, dist='norm'):
     if dist == 'norm':
         for c in dat[cat].unique():
             x = dat[dat[cat] == c]['value']
-            ret[c] = norm_ppk(x, lsl=lsl, usl=usl)
+            ret[c] = norm(x, lsl=lsl, usl=usl)
     else:
         raise NotImplementedError
     ret = pd.DataFrame(list(ret.items()))
