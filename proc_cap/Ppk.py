@@ -18,8 +18,9 @@ def norm(x, lsl = None, usl = None):
     ret = 0.0
     if not lsl and not usl:
         raise SyntaxError('LSL and / or USL needed')
-    if lsl > usl:
-        raise SyntaxError('LSL must be stricly inferior to USL')
+    if lsl is not None and usl is not None:
+        if lsl > usl:
+            raise SyntaxError('LSL must be stricly inferior to USL')
     mu, std = scipy.stats.norm.fit(x)
     if lsl and not usl:
         ret = PpX(mu, std, lsl)
