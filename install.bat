@@ -1,2 +1,2 @@
 py ./setup.py --set-build
-py -m pipv install .
+py -m pip install .
