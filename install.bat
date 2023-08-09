@@ -1,2 +1,2 @@
-py3 ./setup.py --set-build
-pip3 install .
+py ./setup.py --set-build
+py -m pipv install .
