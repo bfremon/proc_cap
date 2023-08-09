@@ -6,7 +6,7 @@ import os
 import sys
 
 sys.path.append(os.path.join(os.getcwd()))
-version_file = os.path.join(os.path.join(os.getcwd(), '.VERSION'))
+version_file = os.path.join(os.path.join(os.getcwd(), 'VERSION'))
 
 
 def _split_version_nb(l):
