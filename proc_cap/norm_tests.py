@@ -43,6 +43,16 @@ def shap_wilk(x, stat=False):
     return ret
 
 
+def sk(x, stat = False):
+    '''
+    Return p-value and test stat (if stat set to True) for x
+    to determine if x differs from a normal law (conservative skewness)
+    '''
+    ret = normaltest(x)
+    ret = _is_stat_set(stat, ret)
+    return ret
+
+
 def AD(x, dist='norm', stat=False):
     '''
     Return p-value and test stat (if stat set to True) for x 
