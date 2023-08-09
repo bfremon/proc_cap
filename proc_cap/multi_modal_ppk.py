@@ -7,6 +7,7 @@ import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 from pl0t import *
+import Ppk
 import norm_tests
 
 
@@ -65,9 +66,21 @@ def equal_variances(data):
         samples.append(data[ data['variable'] == smpl]['value'].to_list())
     stat, p = scipy.stats.levene(*samples)
     return p
+
+
+def calc_ppk(smpl, lsl, usl, sd = None):
+    if sd is None:
+        mu, sd_pop = scipy.stats.norm.fit(smpl)
+    else:
+        mu = np.mean(smpl)
+        sd_pop = sd
+    ret = Ppk.Ppk(mu, sd_pop, lsl, usl)
+    return ret
+
     
-        
-pop = gen_pops(25, 30, 16, 100, False)
+lsl = 25
+usl = 30
+pop = gen_pops(lsl, usl, 16, 100, False)
 bplt('value', 'variable', pop, orient = 'vertical')
 hline(25)
 hline(30)
@@ -91,9 +104,12 @@ save('norm_pvals')
 clr()
 
 print('Pooled std (a.k.a overall std): %2.3f' % overall_sd(pop))
-for smpl in pop['variable'].unique():
-    dat = pop[ pop['variable'] == smpl ]
-    print(np.var(dat['value'], ddof = 1))
+# for smpl in pop['variable'].unique():
+#     dat = pop[ pop['variable'] == smpl ]
+#     print(np.var(dat['value'], ddof = 1))
     
-print(equal_variances(pop))
+print('Equal variance (p > 0.05): %1.3f' % equal_variances(pop))
 
+for smpl in pop['variable'].unique():
+    dat = pop [ pop['variable'] == smpl ]
+    print(calc_ppk(dat, lsl, usl))
