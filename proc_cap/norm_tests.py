@@ -3,7 +3,7 @@
 from Log import *
 import pandas as pd
 import numpy as np
-from scipy.stats import shapiro, anderson, kstest
+from scipy.stats import shapiro, anderson, kstest, normaltest
 import random
 import string
 
