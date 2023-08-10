@@ -48,7 +48,7 @@ def sk(x, stat = False):
     Return p-value and test stat (if stat set to True) for x
     to determine if x differs from a normal law (conservative skewness)
     '''
-    ret = normaltest(x)
+    ret = reversed(list(normaltest(x)))
     ret = _is_stat_set(stat, ret)
     return ret
 
