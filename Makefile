@@ -11,7 +11,7 @@ test: clean
 
 install: pip
 
-pip: README.md setup.py .VERSION LICENCE proc_cap/__init__.py pre
+pip: README.md setup.py VERSION LICENCE proc_cap/__init__.py pre
 	$(python3) ./setup.py --set-build
 	$(pip) install .
 
