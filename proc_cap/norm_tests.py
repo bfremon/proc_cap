@@ -77,7 +77,7 @@ def AD(x, dist='norm', stat=False):
 def kolgomorov(x, dist='norm', stat=False):
     '''
     Return p-value and test stat (if stat set to True) for x 
-    using Anderson-Darling test. dist can be used to test for alternate 
+    using kolgomorov test. dist can be used to test for alternate 
     statistical laws
     '''
     dat = _prep_dat(x, dist)
