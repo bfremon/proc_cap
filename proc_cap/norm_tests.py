@@ -9,30 +9,6 @@ import string
 
 set_dbg_lvl(False)
 
-def _prep_dat(x, dist='norm'):
-    shp = np.shape(x)
-    ret = None
-    if len(shp) == 1:
-        if shp[0] == 0:
-            raise ValueError('Non null data vector needed')
-        if dist == 'norm':
-            ret = x
-        elif dist == 'lognormal':
-            ret = np.log(x)
-        else:
-            raise NotImplementedError
-    else:
-        ret = {}
-        dbg(x.columns)
-        for i in x.columns:
-            dbg(i)
-            if len(x[i]) == 0:
-                raise ValueError('Non null data vector needed')
-            ret[i] = _prep_dat(x[i], dist=dist)
-        ret = pd.DataFrame(ret)
-    return ret
-
-
 def shap_wilk(x, stat=False):
     '''
     Return p-value and test stat (if stat set to True) for x 
@@ -60,8 +36,7 @@ def AD(x, dist='norm', stat=False):
     statistical laws
     '''
     # source: https://www.spcforexcel.com/knowledge/basic-statistics/anderson-darling-test-for-normality
-    dat = _prep_dat(x, dist)
-    AD, crit, sig = anderson(dat, dist=dist)
+    AD, crit, sig = anderson(x, dist=dist)
     if AD >= .6:
         pval = np.exp(1.2937 - 5.709*AD - .0186*(AD**2))
     elif AD >=.34:
@@ -80,8 +55,7 @@ def kolgomorov(x, dist='norm', stat=False):
     using kolgomorov test. dist can be used to test for alternate 
     statistical laws
     '''
-    dat = _prep_dat(x, dist)
-    ret = tuple(list(reversed(list(kstest(dat, dist)))))
+    ret = tuple(list(reversed(list(kstest(x, dist)))))
     ret = _is_stat_set(stat, ret)
     return ret
 
@@ -94,21 +68,15 @@ def batch(x, dist='norm', ad=True, kolg=True, shap=True, stat=False):
     if not ad and not kolg and not shap:
         raise SyntaxError('At least one normality test needed')
     ret = {}
-    dat = _prep_dat(x, dist)
-    if len(np.shape(dat)) == 1:
-        if ad:
-            anderson_ret = AD(x, dist=dist, stat=True)
-            ret['AD'] = _is_stat_set(stat, anderson_ret)
-        if kolg:
-            kolg_ret = kolgomorov(x, dist=dist, stat=True)
-            ret['kolgomorov'] = _is_stat_set(stat, kolg_ret)
-        if shap:
-            shap_ret = shap_wilk(x, stat=True)
-            ret['shap_wilk'] = _is_stat_set(stat, shap_ret)
-    else:
-        for v in dat:
-            ret[v] = batch(dat[v], dist=dist, ad=ad,
-                               kolg=kolg, shap=shap, stat=stat)
+    if ad:
+        anderson_ret = AD(x, dist=dist, stat=True)
+        ret['AD'] = _is_stat_set(stat, anderson_ret)
+    if kolg:
+        kolg_ret = kolgomorov(x, dist=dist, stat=True)
+        ret['kolgomorov'] = _is_stat_set(stat, kolg_ret)
+    if shap:
+        shap_ret = shap_wilk(x, stat=True)
+        ret['shap_wilk'] = _is_stat_set(stat, shap_ret)
     return ret
 
 

@@ -16,6 +16,7 @@ class test_norm_tests(unittest.TestCase):
         std = 0.1
         multiple_cnt = 10
         self.single = self._gen_norm_series(mu, std, 200, 1, 0.1, 0.1)[0]
+        self.x = list(self.single)
         self.multiple = self._gen_norm_series(mu, std, 200, multiple_cnt, 0.1, 0.1)
         self.zero_len = pd.DataFrame({0: (), 1: ()})
         self.cols = [ self._rnd_str() for i in range(multiple_cnt) ]
@@ -61,14 +62,6 @@ class test_norm_tests(unittest.TestCase):
         return ret
 
     
-    def test__prep_dat(self):
-        self.assertRaises(ValueError, norm_tests._prep_dat, ())
-        self.assertRaises(ValueError, norm_tests._prep_dat, self.zero_len)
-        r = norm_tests._prep_dat(self.multiple)
-        self.assertTrue(np.shape(r)[0] == 200)
-        self.assertTrue(np.shape(r)[1] == 10)
-
-        
     def test_is_stat_set(self):
         st = True
         res = (1, 2)
@@ -83,6 +76,8 @@ class test_norm_tests(unittest.TestCase):
         self.assertTrue(0 <= r <= 1)
         r = norm_tests.shap_wilk(self.single, stat=True)
         self.assertTrue(isinstance(r, tuple))
+        self.assertTrue(norm_tests.shap_wilk(self.x, True)[0] == norm_tests.shap_wilk(self.x))
+        self.assertTrue(0 <= norm_tests.shap_wilk(self.x) <=1)
 
         
     def test_AD(self):
@@ -91,7 +86,8 @@ class test_norm_tests(unittest.TestCase):
         self.assertTrue(0 <= r <= 1)
         r = norm_tests.AD(self.single, stat=True)
         self.assertTrue(isinstance(r, tuple))
-        self.assertRaises(NotImplementedError, norm_tests.AD, self.single, dist='weibull')
+        self.assertTrue(norm_tests.AD(self.x, stat = True)[0] == norm_tests.AD(self.x))
+        self.assertTrue(0 <= norm_tests.AD(self.x) <=1)
 
         
     def test_kolgomorov(self):
@@ -100,7 +96,8 @@ class test_norm_tests(unittest.TestCase):
         self.assertTrue(0 <= r <= 1)
         r = norm_tests.kolgomorov(self.single, stat=True)
         self.assertTrue(isinstance(r, tuple))
-        self.assertRaises(NotImplementedError, norm_tests.kolgomorov, self.single, dist='weibull')
+        self.assertTrue(norm_tests.kolgomorov(self.single, stat = True)[0] == norm_tests.kolgomorov(self.single))
+        self.assertTrue(0 <= norm_tests.kolgomorov(self.single) <=1)
 
 
     def test_omnibus(self):
@@ -121,7 +118,6 @@ class test_norm_tests(unittest.TestCase):
 
         
     def test_batch(self):
-        self.assertRaises(NotImplementedError, norm_tests.batch, self.single, dist='weibull')
         self.assertRaises(SyntaxError, norm_tests.batch, self.single,
                           ad=False, kolg=False, shap=False)
             
@@ -133,29 +129,6 @@ class test_norm_tests(unittest.TestCase):
         self.assertTrue(len(r) == 3)
         for v in r.keys():
             self.assertTrue(len(r[v]) == 2)
-        r = norm_tests.batch(self.multiple, stat=False)
-        self.assertTrue(len(r) == len(self.multiple.columns))
-        for col in r.keys():
-            self.assertTrue(len(r[col]) == 3)
-        r = norm_tests.batch(self.multiple, stat=True)
-        self.assertTrue(len(r) == len(self.multiple.columns))
-        for col in r.keys():
-            self.assertTrue(len(r[col]) == 3)
-            for test in r[col]:
-                self.assertTrue(len(r[col][test]) == 2)
-                    
-        self.multiple.columns = self.cols
-        r = norm_tests.batch(self.multiple, stat=False)
-        self.assertTrue(len(r) == len(self.multiple.columns))
-        self.assertTrue(list(r.keys()) == self.cols)
-        for col in r.keys():
-            self.assertTrue(len(r[col]) == 3)
-        r = norm_tests.batch(self.multiple, stat=True)
-        self.assertTrue(len(r) == len(self.multiple.columns))
-        for col in r.keys():
-            self.assertTrue(len(r[col]) == 3)
-            for test in r[col]:
-                self.assertTrue(len(r[col][test]) == 2)
 
     
 unittest.main()
