@@ -102,6 +102,23 @@ class test_norm_tests(unittest.TestCase):
         self.assertTrue(isinstance(r, tuple))
         self.assertRaises(NotImplementedError, norm_tests.kolgomorov, self.single, dist='weibull')
 
+
+    def test_omnibus(self):
+        x = stats.norm.rvs(loc = 10, scale = 2, size = 50)
+        trun_x = []
+        for v in x:
+            dec = v - np.floor(v)
+            if 0 <= dec < 0.25:
+                trun_x += [ np.ceil(v) + 0 ]
+            elif 0.25 <= dec < 0.5:
+                trun_x += [ np.ceil(v) + 0.25 ]
+            elif 0.5 <= dec < 0.75:
+                trun_x += [ np.ceil(v) + .5 ]
+            else:
+                trun_x += [ np.ceil(v) + .75 ]
+        self.assertTrue(norm_tests.omnibus(trun_x, True)[0] == norm_tests.omnibus(trun_x))
+        self.assertTrue(0 <= norm_tests.omnibus(trun_x) <=1)
+
         
     def test_batch(self):
         self.assertRaises(NotImplementedError, norm_tests.batch, self.single, dist='weibull')
