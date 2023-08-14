@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 
 from Log import *
 import pandas as pd
@@ -86,7 +86,7 @@ def kolgomorov(x, dist='norm', stat=False):
     return ret
 
 
-def norm_test(x, dist='norm', ad=True, kolg=True, shap=True, stat=False):
+def batch(x, dist='norm', ad=True, kolg=True, shap=True, stat=False):
     ''' 
     Return p-values and test stats (if stat set to True) for x 
     x can be a 1D vector or array of 1D vectors
@@ -107,7 +107,7 @@ def norm_test(x, dist='norm', ad=True, kolg=True, shap=True, stat=False):
             ret['shap_wilk'] = _is_stat_set(stat, shap_ret)
     else:
         for v in dat:
-            ret[v] = norm_test(dat[v], dist=dist, ad=ad,
+            ret[v] = batch(dat[v], dist=dist, ad=ad,
                                kolg=kolg, shap=shap, stat=stat)
     return ret
 

@@ -103,25 +103,24 @@ class test_norm_tests(unittest.TestCase):
         self.assertRaises(NotImplementedError, norm_tests.kolgomorov, self.single, dist='weibull')
 
         
-    def test_norm_test(self):
-        self.assertRaises(NotImplementedError, norm_tests.norm_test, self.single, dist='weibull')
-        self.assertRaises(SyntaxError, norm_tests.norm_test, self.single,
+    def test_batch(self):
+        self.assertRaises(NotImplementedError, norm_tests.batch, self.single, dist='weibull')
+        self.assertRaises(SyntaxError, norm_tests.batch, self.single,
                           ad=False, kolg=False, shap=False)
             
-        r = norm_tests.norm_test(self.single, stat=False)
+        r = norm_tests.batch(self.single, stat=False)
         self.assertTrue(len(r) == 3)
         for v in r.keys():
-            print(r[v])
             self.assertTrue(isinstance(r[v], np.float))
-        r = norm_tests.norm_test(self.single, stat=True)
+        r = norm_tests.batch(self.single, stat=True)
         self.assertTrue(len(r) == 3)
         for v in r.keys():
             self.assertTrue(len(r[v]) == 2)
-        r = norm_tests.norm_test(self.multiple, stat=False)
+        r = norm_tests.batch(self.multiple, stat=False)
         self.assertTrue(len(r) == len(self.multiple.columns))
         for col in r.keys():
             self.assertTrue(len(r[col]) == 3)
-        r = norm_tests.norm_test(self.multiple, stat=True)
+        r = norm_tests.batch(self.multiple, stat=True)
         self.assertTrue(len(r) == len(self.multiple.columns))
         for col in r.keys():
             self.assertTrue(len(r[col]) == 3)
@@ -129,12 +128,12 @@ class test_norm_tests(unittest.TestCase):
                 self.assertTrue(len(r[col][test]) == 2)
                     
         self.multiple.columns = self.cols
-        r = norm_tests.norm_test(self.multiple, stat=False)
+        r = norm_tests.batch(self.multiple, stat=False)
         self.assertTrue(len(r) == len(self.multiple.columns))
         self.assertTrue(list(r.keys()) == self.cols)
         for col in r.keys():
             self.assertTrue(len(r[col]) == 3)
-        r = norm_tests.norm_test(self.multiple, stat=True)
+        r = norm_tests.batch(self.multiple, stat=True)
         self.assertTrue(len(r) == len(self.multiple.columns))
         for col in r.keys():
             self.assertTrue(len(r[col]) == 3)
