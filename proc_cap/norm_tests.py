@@ -43,7 +43,7 @@ def shap_wilk(x, stat=False):
     return ret
 
 
-def sk(x, stat = False):
+def omnibus(x, stat = False):
     '''
     Return p-value and test stat (if stat set to True) for x
     to determine if x differs from a normal law (conservative skewness)
