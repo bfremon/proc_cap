@@ -14,7 +14,7 @@ def shap_wilk(x, stat=False):
     Return p-value and test stat (if stat set to True) for x 
     using Shapiro-Wilk test
     '''
-    ret = shapiro(x)
+    ret = list(reversed(shapiro(x)))
     ret = _is_stat_set(stat, ret)
     return ret
 
